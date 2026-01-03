@@ -1,55 +1,42 @@
+
 from homeassistant.components.sensor import SensorEntity
-from homeassistant.const import UnitOfTemperature, UnitOfPower
+from homeassistant.helpers.entity import EntityCategory
 from .const import DOMAIN
-
-TEMP_SENSORS = {
-    "zew": "Temperatura zewnętrzna",
-    "out": "Zasilanie CO",
-    "ret": "Powrót CO",
-    "cwu": "CWU",
-    "zadactcwu": "CWU zadana",
-    "compevap": "Parownik",
-    "compsuc": "Ssanie sprężarki",
-}
-
-POWER_SENSORS = {
-    "powerneed": "Pobór mocy",
-    "comprpow": "Moc sprężarki",
-}
 
 async def async_setup_entry(hass, entry, async_add_entities):
     coordinator = hass.data[DOMAIN][entry.entry_id]
-    entities = []
-
-    for key, name in TEMP_SENSORS.items():
-        entities.append(LazarTempSensor(coordinator, key, name))
-
-    for key, name in POWER_SENSORS.items():
-        entities.append(LazarPowerSensor(coordinator, key, name))
-
+    data = coordinator.data
+    entities = [
+        LazarSensor(coordinator, "Temperatura zewnętrzna", ["stat","temps","zew"], 0.1, "°C"),
+        LazarSensor(coordinator, "Temperatura CWU", ["stat","temps","cwu"], 0.1, "°C"),
+        LazarSensor(coordinator, "Pobór mocy", ["stat","unit","powerneed"], 1, "W"),
+    ]
     async_add_entities(entities)
 
-class LazarTempSensor(SensorEntity):
-    def __init__(self, coordinator, key, name):
+class LazarSensor(SensorEntity):
+    def __init__(self, coordinator, name, path, factor, unit):
         self.coordinator = coordinator
-        self.key = key
-        self._attr_name = name
-        self._attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
+        self._name = name
+        self._path = path
+        self._factor = factor
+        self._unit = unit
 
     @property
-    def native_value(self):
-        val = self.coordinator.data["stat"]["temps"].get(self.key)
-        if val in (None, -9999):
-            return None
-        return val / 10
-
-class LazarPowerSensor(SensorEntity):
-    def __init__(self, coordinator, key, name):
-        self.coordinator = coordinator
-        self.key = key
-        self._attr_name = name
-        self._attr_native_unit_of_measurement = UnitOfPower.WATT
+    def name(self):
+        return self._name
 
     @property
-    def native_value(self):
-        return self.coordinator.data["stat"]["unit"].get(self.key)
+    def native_unit_of_measurement(self):
+        return self._unit
+
+    @property
+    def state(self):
+        data = self.coordinator.data
+        for p in self._path:
+            data = data.get(p, {})
+        if isinstance(data, (int, float)):
+            return data * self._factor
+        return None
+
+    async def async_update(self):
+        await self.coordinator.async_request_refresh()
