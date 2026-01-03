@@ -1,42 +1,35 @@
 
 from homeassistant.components.sensor import SensorEntity
-from homeassistant.helpers.entity import EntityCategory
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
+from homeassistant.const import UnitOfTemperature, UnitOfPower
 from .const import DOMAIN
+
+SENSORS = [
+    ("zew", "Temperatura zewnętrzna", ["stat","temps","zew"], 0.1, UnitOfTemperature.CELSIUS),
+    ("out", "Zasilanie CO", ["stat","temps","out"], 0.1, UnitOfTemperature.CELSIUS),
+    ("ret", "Powrót CO", ["stat","temps","ret"], 0.1, UnitOfTemperature.CELSIUS),
+    ("cwu", "Temperatura CWU", ["stat","temps","cwu"], 0.1, UnitOfTemperature.CELSIUS),
+    ("power", "Pobór mocy", ["stat","unit","powerneed"], 1, UnitOfPower.WATT),
+]
 
 async def async_setup_entry(hass, entry, async_add_entities):
     coordinator = hass.data[DOMAIN][entry.entry_id]
-    data = coordinator.data
-    entities = [
-        LazarSensor(coordinator, "Temperatura zewnętrzna", ["stat","temps","zew"], 0.1, "°C"),
-        LazarSensor(coordinator, "Temperatura CWU", ["stat","temps","cwu"], 0.1, "°C"),
-        LazarSensor(coordinator, "Pobór mocy", ["stat","unit","powerneed"], 1, "W"),
-    ]
-    async_add_entities(entities)
+    async_add_entities([LazarSensor(coordinator, *s) for s in SENSORS])
 
-class LazarSensor(SensorEntity):
-    def __init__(self, coordinator, name, path, factor, unit):
-        self.coordinator = coordinator
-        self._name = name
-        self._path = path
-        self._factor = factor
-        self._unit = unit
+class LazarSensor(CoordinatorEntity, SensorEntity):
+    def __init__(self, coordinator, key, name, path, factor, unit):
+        super().__init__(coordinator)
+        self._attr_unique_id = f"lazar_{key}"
+        self._attr_name = name
+        self.path = path
+        self.factor = factor
+        self._attr_native_unit_of_measurement = unit
 
     @property
-    def name(self):
-        return self._name
-
-    @property
-    def native_unit_of_measurement(self):
-        return self._unit
-
-    @property
-    def state(self):
+    def native_value(self):
         data = self.coordinator.data
-        for p in self._path:
+        for p in self.path:
             data = data.get(p, {})
         if isinstance(data, (int, float)):
-            return data * self._factor
+            return data * self.factor
         return None
-
-    async def async_update(self):
-        await self.coordinator.async_request_refresh()
