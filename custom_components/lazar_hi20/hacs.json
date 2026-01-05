@@ -1,5 +1,8 @@
 {
   "name": "Lazar HI20 Heat Pump",
+  "render_readme": true,
   "content_in_root": false,
-  "render_readme": true
+  "country": "PL",
+  "homeassistant": "2025.1.0",
+  "icon": "mdi:heat-pump"
 }
