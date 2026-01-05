@@ -3,14 +3,13 @@ from .const import DOMAIN
 
 async def async_setup_entry(hass, entry, async_add_entities):
     coordinator = hass.data[DOMAIN][entry.entry_id]
-    sensors = []
-    temps = coordinator.data["stat"]["temps"]
-    for key, val in temps.items():
-        sensors.append(LazarTempSensor(coordinator, key, val))
-    async_add_entities(sensors)
+    entities = []
+    for key in coordinator.data["stat"]["temps"]:
+        entities.append(LazarTempSensor(coordinator, key))
+    async_add_entities(entities)
 
 class LazarTempSensor(SensorEntity):
-    def __init__(self, coordinator, key, value):
+    def __init__(self, coordinator, key):
         self.coordinator = coordinator
         self._key = key
         self._attr_unique_id = f"lazar_hi20_temp_{key}"

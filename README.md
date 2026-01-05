@@ -1,26 +1,22 @@
-# Lazar HI20 Heat Pump – Home Assistant Integration
+# Lazar HI20 – Home Assistant Integration
 
-## Opis
-Pełna integracja Home Assistant (2025) dla pompy ciepła **Lazar HI20** poprzez oficjalne API chmurowe hkslazar.net.
+Pełna integracja Home Assistant 2025 dla pompy ciepła Lazar HI20 (cloud polling).
 
 ## Funkcje
 - Config Flow (UI)
-- Sensory temperatur (×0.1°C)
+- Sensory temperatur
+- Climate (termostat HA)
 - Switch ON/OFF
-- Select trybu pracy (CO / Chłodzenie / CWU)
-- Climate entity
-- Obsługa energii (Energy Dashboard)
-- Gotowe do HACS
-
-## COP
-COP liczony uproszczoną metodą: energia wyjściowa / energia elektryczna.
-Brak danych przepływu → przyjęto nominalne parametry producenta.
+- Select trybu pracy
+- Lovelace Dashboard YAML
+- Gotowe pod HACS
 
 ## Instalacja
-1. Dodaj repozytorium do HACS
-2. Zainstaluj „Lazar HI20 Heat Pump”
-3. Restart HA
-4. Dodaj integrację z UI
+1. Skopiuj repozytorium do GitHub
+2. Dodaj repo jako Custom Repository w HACS
+3. Zainstaluj integrację
+4. Restart Home Assistant
+5. Dodaj integrację z UI
 
 ## Release
-v2026.1.1
+v2025.1.1

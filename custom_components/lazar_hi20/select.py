@@ -1,23 +1,18 @@
 from homeassistant.components.select import SelectEntity
 from .const import DOMAIN
 
-MODES = {
-    0: "Grzanie",
-    1: "Chłodzenie",
-    2: "CWU"
-}
+MODES = {0: "Grzanie", 1: "Chlodzenie", 2: "CWU"}
 
 async def async_setup_entry(hass, entry, async_add_entities):
-    coordinator = hass.data[DOMAIN][entry.entry_id]
-    async_add_entities([LazarModeSelect(coordinator)])
+    async_add_entities([LazarModeSelect(hass, entry)])
 
 class LazarModeSelect(SelectEntity):
     _attr_name = "Lazar Tryb Pracy"
     _attr_unique_id = "lazar_hi20_mode"
     _attr_options = list(MODES.values())
 
-    def __init__(self, coordinator):
-        self.coordinator = coordinator
+    def __init__(self, hass, entry):
+        self.coordinator = hass.data[DOMAIN][entry.entry_id]
 
     @property
     def current_option(self):

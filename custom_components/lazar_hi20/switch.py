@@ -2,15 +2,14 @@ from homeassistant.components.switch import SwitchEntity
 from .const import DOMAIN
 
 async def async_setup_entry(hass, entry, async_add_entities):
-    coordinator = hass.data[DOMAIN][entry.entry_id]
-    async_add_entities([LazarPowerSwitch(coordinator)])
+    async_add_entities([LazarPowerSwitch(hass, entry)])
 
 class LazarPowerSwitch(SwitchEntity):
     _attr_name = "Lazar HI20 Power"
     _attr_unique_id = "lazar_hi20_power"
 
-    def __init__(self, coordinator):
-        self.coordinator = coordinator
+    def __init__(self, hass, entry):
+        self.coordinator = hass.data[DOMAIN][entry.entry_id]
 
     @property
     def is_on(self):
