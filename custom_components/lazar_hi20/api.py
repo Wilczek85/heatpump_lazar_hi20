@@ -2,34 +2,22 @@
 import aiohttp
 from .const import API_BASE
 
-class LazarAPI:
-    def __init__(self, session, login, password):
-        self._session = session
-        self._login = login
-        self._password = password
-        self._cookie = None
+class LazarHI20API:
+    def __init__(self, username, password):
+        self.username = username
+        self.password = password
+        self.session = aiohttp.ClientSession()
 
     async def login(self):
-        async with self._session.post(f"{API_BASE}/sollogin", data={
-            "login": self._login,
-            "haslo": self._password
+        async with self.session.post(f"{API_BASE}/sollogin", data={
+            "login": self.username,
+            "password": self.password
         }) as resp:
-            resp.raise_for_status()
-            self._cookie = resp.cookies.get("solaccess")
+            if resp.status != 200:
+                raise Exception("Login failed")
 
-    async def get_data(self):
-        if not self._cookie:
-            await self.login()
-        async with self._session.get(
-            f"{API_BASE}/oemSerwis?what=bcst",
-            cookies={"solaccess": self._cookie.value}
-        ) as resp:
-            resp.raise_for_status()
+    async def get_bcst(self):
+        async with self.session.get(f"{API_BASE}/oemSerwis?what=bcst") as resp:
+            if "application/json" not in resp.headers.get("Content-Type",""):
+                return {}
             return await resp.json()
-
-    async def set_param(self, param, value):
-        async with self._session.get(
-            f"{API_BASE}/oemSerwis?what=setparam&param={param}&value={value}",
-            cookies={"solaccess": self._cookie.value}
-        ) as resp:
-            resp.raise_for_status()

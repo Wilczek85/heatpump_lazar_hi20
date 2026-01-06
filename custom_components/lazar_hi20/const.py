@@ -1,5 +1,6 @@
 
 DOMAIN = "lazar_hi20"
-NAME = "Lazar HI20 Heat Pump"
-VERSION = "2026.1.1"
+PLATFORMS = ["sensor", "switch", "climate"]
+CONF_USERNAME = "username"
+CONF_PASSWORD = "password"
 API_BASE = "https://hkslazar.net"
