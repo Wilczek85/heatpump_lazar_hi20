@@ -1,12 +1,10 @@
 {
   "domain": "lazar_hi20",
   "name": "Lazar HI20 Heat Pump",
-  "version": "2026.1.2",
-  "documentation": "https://github.com/Wilczek85/heatpump_lazar_hi20",
-  "requirements": [],
-  "codeowners": [
-    "@Wilczek85"
-  ],
+  "version": "2026.1.0",
   "config_flow": true,
+  "documentation": "https://hkslazar.net",
+  "requirements": ["aiohttp"],
+  "codeowners": ["@local"],
   "iot_class": "cloud_polling"
 }
