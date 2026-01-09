@@ -1,23 +1,28 @@
-
 import aiohttp
-from .const import API_BASE
 
-class LazarHI20API:
+class LazarAPI:
     def __init__(self, username, password):
         self.username = username
         self.password = password
+        self.session = None
+
+    async def async_login(self):
         self.session = aiohttp.ClientSession()
-
-    async def login(self):
-        async with self.session.post(f"{API_BASE}/sollogin", data={
-            "login": self.username,
-            "password": self.password
-        }) as resp:
+        async with self.session.post(
+            "https://hkslazar.net/sollogin",
+            data={"login": self.username, "password": self.password},
+            timeout=10
+        ) as resp:
             if resp.status != 200:
-                raise Exception("Login failed")
+                raise RuntimeError("Login failed")
 
-    async def get_bcst(self):
-        async with self.session.get(f"{API_BASE}/oemSerwis?what=bcst") as resp:
-            if "application/json" not in resp.headers.get("Content-Type",""):
-                return {}
+    async def async_fetch(self):
+        async with self.session.get(
+            "https://hkslazar.net/oemSerwis?what=bcst",
+            timeout=10
+        ) as resp:
             return await resp.json()
+
+    async def async_close(self):
+        if self.session:
+            await self.session.close()

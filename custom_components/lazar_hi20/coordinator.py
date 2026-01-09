@@ -1,22 +1,23 @@
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
-from homeassistant.core import HomeAssistant
+import logging
 from datetime import timedelta
-import aiohttp
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
+from .const import UPDATE_INTERVAL
+
+_LOGGER = logging.getLogger(__name__)
 
 class LazarCoordinator(DataUpdateCoordinator):
-    def __init__(self, hass: HomeAssistant, entry):
-        self.username = entry.data["username"]
-        self.password = entry.data["password"]
-        self.session = aiohttp.ClientSession()
+    def __init__(self, hass, api):
         super().__init__(
             hass,
-            logger=None,
-            name="Lazar HI20",
-            update_interval=timedelta(seconds=60),
+            _LOGGER,
+            name="lazar_hi20",
+            update_interval=timedelta(seconds=UPDATE_INTERVAL)
         )
+        self.api = api
 
     async def _async_update_data(self):
-        async with self.session.get("https://hkslazar.net/oemSerwis?what=bcst", auth=aiohttp.BasicAuth(self.username, self.password)) as resp:
-            if resp.status != 200:
-                return {}
-            return await resp.json()
+        data = await self.api.async_fetch()
+        data.setdefault("energy_total", 0.0)
+        data.setdefault("energy_compressor", 0.0)
+        data.setdefault("troom", None)
+        return data
